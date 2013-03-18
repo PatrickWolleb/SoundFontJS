@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/[PatrickWolleb]/[SoundFontJS].png)](https://travis-ci.org/[PatrickWolleb]/[SoundFontJS])
 SoundFontJS
 ===========
 
