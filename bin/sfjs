@@ -2,17 +2,11 @@
 
 var fs = require('fs');
 var exec = require('child_process').exec;
-
-var package = JSON.parse(fs.readFileSync('../package.json'));
 var program = require('commander');
-
 var ProgressBar = require('progress');
 
-
-
-
 program
-  .version(package.version)
+  .version(0.0.1)
   .description('create js sound font from wav')
   .option('-s --source <path>', 'source audio file', 'font.wav')
   .option('-b --build <path>', 'build directory defaults to "build"', 'build' )
