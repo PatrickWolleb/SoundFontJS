@@ -6,7 +6,7 @@ var program = require('commander');
 var ProgressBar = require('progress');
 
 program
-  .version(0.0.1)
+  .version('0.0.1')
   .description('create js sound font from wav')
   .option('-s --source <path>', 'source audio file', 'font.wav')
   .option('-b --build <path>', 'build directory defaults to "build"', 'build' )
