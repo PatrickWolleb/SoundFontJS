@@ -1,8 +1,8 @@
 {
-  "name": "SoundFontJS",
+  "name": "soundfontjs",
   "version": "0.0.1",
   "description": "dsaad",
-  "main": "index.js",
+  "bin": "./bin/sfjs",
   "scripts": {
     "test": "npm install && jasmine-node test/spec"
   },
