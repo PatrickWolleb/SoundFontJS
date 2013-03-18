@@ -1,0 +1,28 @@
+{
+  "name": "SoundFontJS",
+  "version": "0.0.0",
+  "description": "dsaad",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm install && jasmine-node test/spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SHMEDIALIMITED/SoundFontJS.git"
+  },
+  "author": "patrick.wolleb@shmedia.co.uk",
+  "license": "BSD",
+  "keywords": [
+    "Soundfont",
+    "Sound",
+    "font",
+    "audio",
+    "html5",
+    "webaudio",
+    "convert"
+  ],
+  "dependencies": {
+    "commander": "~1.1.1",
+    "progress": "~0.1.0"
+  }
+}
