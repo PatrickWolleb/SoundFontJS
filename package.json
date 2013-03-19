@@ -1,6 +1,6 @@
 {
   "name": "sfjs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Command line tool for creating sound font js files compatible with MIDI.js.",
   "main" : "./bin/sfjs",
   "bin": "./bin/sfjs",
