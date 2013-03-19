@@ -16,6 +16,8 @@ Make sure you have the following dependencies installed on your system.
 
 ##Usage
 
+Run `ulimit -n 10000` to prevent memory allocation issues.
+
 `sfjs`
 By default the program will look for a font.wav file in CWD and output the files in CWD/build/. The default GM output instrument is acoustic_grand_piano.
 
