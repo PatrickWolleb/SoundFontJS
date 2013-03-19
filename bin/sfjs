@@ -5,26 +5,47 @@ var exec = require('child_process').exec;
 var program = require('commander');
 var ProgressBar = require('progress');
 
+// Midi NoteID to NoteName lookup table
+var noteTable = { "G9": 0x7F, "Gb9": 0x7E, "F9": 0x7D, "E9": 0x7C, "Eb9": 0x7B,
+"D9": 0x7A, "Db9": 0x79, "C9": 0x78, "B8": 0x77, "Bb8": 0x76, "A8": 0x75, "Ab8": 0x74,
+"G8": 0x73, "Gb8": 0x72, "F8": 0x71, "E8": 0x70, "Eb8": 0x6F, "D8": 0x6E, "Db8": 0x6D,
+"C8": 0x6C, "B7": 0x6B, "Bb7": 0x6A, "A7": 0x69, "Ab7": 0x68, "G7": 0x67, "Gb7": 0x66,
+"F7": 0x65, "E7": 0x64, "Eb7": 0x63, "D7": 0x62, "Db7": 0x61, "C7": 0x60, "B6": 0x5F,
+"Bb6": 0x5E, "A6": 0x5D, "Ab6": 0x5C, "G6": 0x5B, "Gb6": 0x5A, "F6": 0x59, "E6": 0x58,
+"Eb6": 0x57, "D6": 0x56, "Db6": 0x55, "C6": 0x54, "B5": 0x53, "Bb5": 0x52, "A5": 0x51,
+"Ab5": 0x50, "G5": 0x4F, "Gb5": 0x4E, "F5": 0x4D, "E5": 0x4C, "Eb5": 0x4B, "D5": 0x4A,
+"Db5": 0x49, "C5": 0x48, "B4": 0x47, "Bb4": 0x46, "A4": 0x45, "Ab4": 0x44, "G4": 0x43,
+"Gb4": 0x42, "F4": 0x41, "E4": 0x40, "Eb4": 0x3F, "D4": 0x3E, "Db4": 0x3D, "C4": 0x3C,
+"B3": 0x3B, "Bb3": 0x3A, "A3": 0x39, "Ab3": 0x38, "G3": 0x37, "Gb3": 0x36, "F3": 0x35,
+"E3": 0x34, "Eb3": 0x33, "D3": 0x32, "Db3": 0x31, "C3": 0x30, "B2": 0x2F, "Bb2": 0x2E,
+"A2": 0x2D, "Ab2": 0x2C, "G2": 0x2B, "Gb2": 0x2A, "F2": 0x29, "E2": 0x28, "Eb2": 0x27,
+"D2": 0x26, "Db2": 0x25, "C2": 0x24, "B1": 0x23, "Bb1": 0x22, "A1": 0x21, "Ab1": 0x20,
+"G1": 0x1F, "Gb1": 0x1E, "F1": 0x1D, "E1": 0x1C, "Eb1": 0x1B, "D1": 0x1A, "Db1": 0x19,
+"C1": 0x18, "B0": 0x17, "Bb0": 0x16, "A0": 0x15};
+
 program
   .description('create js sound font from wav')
   .option('-s --source <path>', 'source audio file', 'font.wav')
-  .option('-b --build <path>', 'build directory defaults to "build"', 'build' )
+  .option('-o --output <name>', 'output instrument name defaults "acoustic_grand_piano"', 'acoustic_grand_piano' )
+  .option('-b --build <path>', 'build directory defualts to CWD', '')
   .option('-l --min <int>', 'minimum bit rate defaults to 64 Kbit/sec', 64 )
   .option('-h --max <int>', 'maximum bit rate defaults to 128 Kbit/sec', 128 )
-  .option('-o --output <name>', 'output instrument name defaults "acoustic_grand_piano"', 'acoustic_grand_piano' )
   .parse(process.argv);
 
    
-var JS_HEADER = 'if (typeof(MIDI) === "undefined") var MIDI = {}; if (typeof(MIDI.Soundfont) === "undefined") MIDI.Soundfont = {}; MIDI.Soundfont.' + program.out + ' = {';
+var JS_HEADER = 'if (typeof(MIDI) === "undefined") var MIDI = {}; if (typeof(MIDI.Soundfont) === "undefined") MIDI.Soundfont = {}; MIDI.Soundfont.' + program.output + ' = {';
 var JS_FOOTER = '}';
-var BUILD_DIR = process.cwd() + '/' + program.build + '/';
+var BUILD_DIR = process.cwd() + '/' + program.build  +  program.output;
 var notesArray = [];
 var input = process.cwd() + '/' + program.source;
 var octaves = 8;
-var output = JS_HEADER + '\n';
 var bar;
 
 
+
+console.info('[SoundFontJS] Source: ', input);
+console.info('[SoundFontJS] Output: ', BUILD_DIR);
+console.info('[SoundFontJS] Start...');
 
 /////////////////////////////////////////
 
@@ -33,6 +54,12 @@ var bar;
 
 
 var prepare = function (cb) {
+
+  if(!fs.existsSync(input)) {
+    console.error('[SoundFontJS] Error: Source file not found. ' + input);
+    process.exit();
+  }
+
   var min = noteTable["C2"];
   var max = noteTable["C7"];
   var absmin = noteTable["A0"];
@@ -55,19 +82,17 @@ var prepare = function (cb) {
 }
 
 
+// Cut Wav slices from source
 var cut = function (cb) {
   var i = 0;
   var j = 0;
   for(; i < 12 * octaves; ++i) {
-    
     s = 0 + i * 2;
     e = s+2;
     exec(__dirname + '/../libs/sox ' + input + ' ' + BUILD_DIR + notesArray[i] + '.wav trim ' + s + ' ' + 2, function(err, stdout, stderr) {
       j++;
       bar.tick();
       if(j == 12 * octaves) {
-
-        console.log(' -> Audio cutting completed');
         if(cb) cb();
       }
     });
@@ -75,6 +100,7 @@ var cut = function (cb) {
 }
 
 
+// Convert slices to OGG
 var convertOGG = function (cb) {
   var j = 0;
   for(var i = 0; i < 12 * octaves; ++i) {
@@ -82,22 +108,21 @@ var convertOGG = function (cb) {
       j++;
       bar.tick();
       if(j == 12 * octaves) {
-        console.log(' -> OGG convertion completed');
         if(cb) cb();  
       }
     });
   }
 } 
 
+
+// Convert slices to MP3
 var convertMP3 = function (cb) {
-  var j = 0;
-  
+  var j = 0;  
   for(var i = 0; i < 12 * octaves; ++i) {
     exec('lame -v -b' + program.min + ' -B ' + program.max + ' ' + BUILD_DIR + notesArray[i] + '.wav', function() {
       j++;
       bar.tick();
       if(j == 12 * octaves) {
-        console.log(' -> MP3 convertion completed');
         if(cb) cb();  
       }
     });
@@ -105,98 +130,85 @@ var convertMP3 = function (cb) {
 } 
 
 
+// Create OGG JS
 var oggToJS = function (cb) {
   var j = 0;
+  var output = JS_HEADER + '\n';
   for(var i = 0; i < octaves * 12; ++i) {
-
     var data = fs.readFileSync(BUILD_DIR + notesArray[i] + '.ogg', 'binary');
-        //console.log('ERROR', err)
-        var base64 = new Buffer(data, 'binary').toString('base64');
-        var js = ('"' + notesArray[i] + '" : "data:audio/ogg;base64,' + base64 + '",\n');
-        output += js;
-
-        bar.tick();
-        if(i==12*octaves) {
-        
-      }
-      
+    var base64 = new Buffer(data, 'binary').toString('base64');
+    var js = ('"' + notesArray[i] + '" : "data:audio/ogg;base64,' + base64 + '",\n');
+    output += js;
+    bar.tick();
   }
+
   output +=  JS_FOOTER;
-  console.log(' -> OGG JS completed');
   if(cb) cb(output);
 }
 
+
+// Create MP3 JS
 var mp3ToJS = function (cb) {
   var j = 0;
+  var output = JS_HEADER + '\n';
   for(var i = 0; i < octaves * 12; ++i) {
-
-   
-
     var data = fs.readFileSync(BUILD_DIR + notesArray[i] + '.mp3', 'binary');
-        //console.log('ERROR', err)
-        var base64 = new Buffer(data, 'binary').toString('base64');
-        var js = ('"' + notesArray[i] + '" : "data:audio/mpeg;base64,' + base64 + '",\n');
-        output += js;
-
-        bar.tick();
-        if(i==12*octaves) {
-        
-      }
-      
+    var base64 = new Buffer(data, 'binary').toString('base64');
+    var js = ('"' + notesArray[i] + '" : "data:audio/mpeg;base64,' + base64 + '",\n');
+    output += js;
+    bar.tick();
   }
   output +=  JS_FOOTER;
   if(cb) cb(output);
-  console.log(' -> MP3 JS completed');
 } 
 
 
+// Write file
 var save = function(output, extension,  cb) {
+  console.log('SAVE ', BUILD_DIR + program.output + '-' + extension + '.js')
   fs.writeFile( BUILD_DIR + program.output + '-' + extension + '.js', output, function(err) {
     if(cb) cb();  
   })
 }
 
-var clean = function(cb) {
-  if(cb) cb();
-}
-
-// Midi NoteID to NoteName lookup table
-var noteTable = { "G9": 0x7F, "Gb9": 0x7E, "F9": 0x7D, "E9": 0x7C, "Eb9": 0x7B,
-"D9": 0x7A, "Db9": 0x79, "C9": 0x78, "B8": 0x77, "Bb8": 0x76, "A8": 0x75, "Ab8": 0x74,
-"G8": 0x73, "Gb8": 0x72, "F8": 0x71, "E8": 0x70, "Eb8": 0x6F, "D8": 0x6E, "Db8": 0x6D,
-"C8": 0x6C, "B7": 0x6B, "Bb7": 0x6A, "A7": 0x69, "Ab7": 0x68, "G7": 0x67, "Gb7": 0x66,
-"F7": 0x65, "E7": 0x64, "Eb7": 0x63, "D7": 0x62, "Db7": 0x61, "C7": 0x60, "B6": 0x5F,
-"Bb6": 0x5E, "A6": 0x5D, "Ab6": 0x5C, "G6": 0x5B, "Gb6": 0x5A, "F6": 0x59, "E6": 0x58,
-"Eb6": 0x57, "D6": 0x56, "Db6": 0x55, "C6": 0x54, "B5": 0x53, "Bb5": 0x52, "A5": 0x51,
-"Ab5": 0x50, "G5": 0x4F, "Gb5": 0x4E, "F5": 0x4D, "E5": 0x4C, "Eb5": 0x4B, "D5": 0x4A,
-"Db5": 0x49, "C5": 0x48, "B4": 0x47, "Bb4": 0x46, "A4": 0x45, "Ab4": 0x44, "G4": 0x43,
-"Gb4": 0x42, "F4": 0x41, "E4": 0x40, "Eb4": 0x3F, "D4": 0x3E, "Db4": 0x3D, "C4": 0x3C,
-"B3": 0x3B, "Bb3": 0x3A, "A3": 0x39, "Ab3": 0x38, "G3": 0x37, "Gb3": 0x36, "F3": 0x35,
-"E3": 0x34, "Eb3": 0x33, "D3": 0x32, "Db3": 0x31, "C3": 0x30, "B2": 0x2F, "Bb2": 0x2E,
-"A2": 0x2D, "Ab2": 0x2C, "G2": 0x2B, "Gb2": 0x2A, "F2": 0x29, "E2": 0x28, "Eb2": 0x27,
-"D2": 0x26, "Db2": 0x25, "C2": 0x24, "B1": 0x23, "Bb1": 0x22, "A1": 0x21, "Ab1": 0x20,
-"G1": 0x1F, "Gb1": 0x1E, "F1": 0x1D, "E1": 0x1C, "Eb1": 0x1B, "D1": 0x1A, "Db1": 0x19,
-"C1": 0x18, "B0": 0x17, "Bb0": 0x16, "A0": 0x15};
 
 
-
-
-
+// Execute function chain
 prepare(function() {
-          bar = new ProgressBar(':bar', { total: 12 * octaves });
+          
+          bar = new ProgressBar('[SoundFontJS][:bar] :percent Cutting Source File', { total: 12 * octaves + 1});
+          bar.tick();
           cut(function(){
-            bar = new ProgressBar(':bar', { total: 12 * octaves });
+            
+
+            bar = new ProgressBar('[SoundFontJS][:bar] :percent Converting to MP3', { total: 12 * octaves + 1});
+            bar.tick();
             convertMP3(function(){
-              bar = new ProgressBar(':bar', { total: 12 * octaves });
+              
+
+              bar = new ProgressBar('[SoundFontJS][:bar] :percent Converting to OGG', { total: 12 * octaves + 1});
+              bar.tick();
               convertOGG(function(){
+                
+                
+                bar = new ProgressBar('[SoundFontJS][:bar] :percent Writing OGG JS', { total: 12 * octaves + 1});
                 notesArray.sort()
-                bar = new ProgressBar(':bar', { total: 12 * octaves });
+                bar.tick();
                 oggToJS(function(output) {
                   save(output, 'ogg', function() {
-                    bar = new ProgressBar(':bar', { total: 12 * octaves });
+                    
+
+                    bar = new ProgressBar('[SoundFontJS][:bar] :percent Writing MP3 JS', { total: 12 * octaves + 1});
+                    bar.tick();
                     mp3ToJS(function(output) {
                       save(output, 'mp3', function() {
+                        
+
+                        console.log('[SoundFontJS] Success');
+                        console.log('[SoundFontJS] Output:', program.output);
                         process.exit();
+                      
+
                       });
                     });
                   });
