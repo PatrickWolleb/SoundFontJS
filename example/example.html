@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    
+    <title>SoundFontJS - Exmaple</title>
+   
+  	<script src="midi.all.js" type="text/javascript"></script>
+
+
+   	<script>
+
+   		window.onload = function() {
+			MIDI.loadPlugin({
+		      soundfontUrl: "acoustic_grand_piano/",
+		      instruments: ["acoustic_grand_piano"],
+		      callback: function() {
+		       	MIDI.Player.loadFile('example.mid', MIDI.Player.start)
+		      }
+			});
+   		}
+      
+   	</script>
+    
+   
+  </head>
+
+  <body>
+  	<h1>SoundFontJS - Exmaple</h1>
+  </body>
