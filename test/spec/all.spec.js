@@ -3,7 +3,7 @@ var exec = require('child_process').exec;
 describe('Test PUBLIC API', function(){
 
   it('checks output', function(done){
-      exec('./bin/sfjs -s ../example/font.wav', function(err, stdout, stderr) {
+      exec('sfjs', function(err, stdout, stderr) {
         console.log('stdout', err);
         console.log('stdout', stdout);
         console.log('stderr', stderr);
