@@ -67,7 +67,7 @@ var cut = function (cb) {
       bar.tick();
       if(j == 12 * octaves) {
 
-        console.log('CUTTING DONE:');
+        console.log(' -> Audio cutting completed');
         if(cb) cb();
       }
     });
@@ -82,6 +82,7 @@ var convertOGG = function (cb) {
       j++;
       bar.tick();
       if(j == 12 * octaves) {
+        console.log(' -> OGG convertion completed');
         if(cb) cb();  
       }
     });
@@ -96,6 +97,7 @@ var convertMP3 = function (cb) {
       j++;
       bar.tick();
       if(j == 12 * octaves) {
+        console.log(' -> MP3 convertion completed');
         if(cb) cb();  
       }
     });
@@ -120,6 +122,7 @@ var oggToJS = function (cb) {
       
   }
   output +=  JS_FOOTER;
+  console.log(' -> OGG JS completed');
   if(cb) cb(output);
 }
 
@@ -143,6 +146,7 @@ var mp3ToJS = function (cb) {
   }
   output +=  JS_FOOTER;
   if(cb) cb(output);
+  console.log(' -> MP3 JS completed');
 } 
 
 
