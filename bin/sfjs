@@ -89,7 +89,7 @@ var cut = function (cb) {
   for(; i < 12 * octaves; ++i) {
     s = 0 + i * 2;
     e = s+2;
-    exec(__dirname + '/../libs/sox ' + input + ' ' + BUILD_DIR + notesArray[i] + '.wav trim ' + s + ' ' + 2, function(err, stdout, stderr) {
+    exec(__dirname + '/../libs/sox ' + input + ' ' + BUILD_DIR + '/' +notesArray[i] + '.wav trim ' + s + ' ' + 2, function(err, stdout, stderr) {
       j++;
       bar.tick();
       if(j == 12 * octaves) {
@@ -104,7 +104,7 @@ var cut = function (cb) {
 var convertOGG = function (cb) {
   var j = 0;
   for(var i = 0; i < 12 * octaves; ++i) {
-    exec('oggenc -m ' + program.min + ' -M ' + program.max + ' ' + BUILD_DIR + notesArray[i] + '.wav', function() {
+    exec('oggenc -m ' + program.min + ' -M ' + program.max + ' ' + BUILD_DIR + '/' + notesArray[i] + '.wav', function() {
       j++;
       bar.tick();
       if(j == 12 * octaves) {
@@ -119,7 +119,7 @@ var convertOGG = function (cb) {
 var convertMP3 = function (cb) {
   var j = 0;  
   for(var i = 0; i < 12 * octaves; ++i) {
-    exec('lame -v -b' + program.min + ' -B ' + program.max + ' ' + BUILD_DIR + notesArray[i] + '.wav', function() {
+    exec('lame -v -b' + program.min + ' -B ' + program.max + ' ' + BUILD_DIR + '/' + notesArray[i] + '.wav', function() {
       j++;
       bar.tick();
       if(j == 12 * octaves) {
@@ -135,7 +135,7 @@ var oggToJS = function (cb) {
   var j = 0;
   var output = JS_HEADER + '\n';
   for(var i = 0; i < octaves * 12; ++i) {
-    var data = fs.readFileSync(BUILD_DIR + notesArray[i] + '.ogg', 'binary');
+    var data = fs.readFileSync(BUILD_DIR + '/' + notesArray[i] + '.ogg', 'binary');
     var base64 = new Buffer(data, 'binary').toString('base64');
     var js = ('"' + notesArray[i] + '" : "data:audio/ogg;base64,' + base64 + '",\n');
     output += js;
@@ -152,7 +152,7 @@ var mp3ToJS = function (cb) {
   var j = 0;
   var output = JS_HEADER + '\n';
   for(var i = 0; i < octaves * 12; ++i) {
-    var data = fs.readFileSync(BUILD_DIR + notesArray[i] + '.mp3', 'binary');
+    var data = fs.readFileSync(BUILD_DIR + '/' + notesArray[i] + '.mp3', 'binary');
     var base64 = new Buffer(data, 'binary').toString('base64');
     var js = ('"' + notesArray[i] + '" : "data:audio/mpeg;base64,' + base64 + '",\n');
     output += js;
@@ -165,8 +165,8 @@ var mp3ToJS = function (cb) {
 
 // Write file
 var save = function(output, extension,  cb) {
-  console.log('SAVE ', BUILD_DIR + program.output + '-' + extension + '.js')
-  fs.writeFile( BUILD_DIR + program.output + '-' + extension + '.js', output, function(err) {
+  console.log('WRITe', BUILD_DIR + '/' + program.output + '-' + extension + '.js')
+  fs.writeFile( BUILD_DIR + '/' + program.output + '-' + extension + '.js', output, function(err) {
     if(cb) cb();  
   })
 }
