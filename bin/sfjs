@@ -25,6 +25,7 @@ var noteTable = { "G9": 0x7F, "Gb9": 0x7E, "F9": 0x7D, "E9": 0x7C, "Eb9": 0x7B,
 
 program
   .description('create js sound font from wav')
+  .option('-p --progress', 'hide progress bar defaults to false')
   .option('-s --source <path>', 'source audio file', 'font.wav')
   .option('-o --output <name>', 'output instrument name defaults "acoustic_grand_piano"', 'acoustic_grand_piano' )
   .option('-b --build <path>', 'build directory defualts to CWD', '')
@@ -91,7 +92,7 @@ var cut = function (cb) {
     e = s+2;
     exec(__dirname + '/../libs/sox ' + input + ' ' + BUILD_DIR + '/' +notesArray[i] + '.wav trim ' + s + ' ' + 2, function(err, stdout, stderr) {
       j++;
-      bar.tick();
+      if(bar) bar.tick();
       if(j == 12 * octaves) {
         if(cb) cb();
       }
@@ -106,7 +107,7 @@ var convertOGG = function (cb) {
   for(var i = 0; i < 12 * octaves; ++i) {
     exec('oggenc -m ' + program.min + ' -M ' + program.max + ' ' + BUILD_DIR + '/' + notesArray[i] + '.wav', function() {
       j++;
-      bar.tick();
+      if(bar) bar.tick();
       if(j == 12 * octaves) {
         if(cb) cb();  
       }
@@ -121,7 +122,7 @@ var convertMP3 = function (cb) {
   for(var i = 0; i < 12 * octaves; ++i) {
     exec('lame -v -b' + program.min + ' -B ' + program.max + ' ' + BUILD_DIR + '/' + notesArray[i] + '.wav', function() {
       j++;
-      bar.tick();
+      if(bar) bar.tick();
       if(j == 12 * octaves) {
         if(cb) cb();  
       }
@@ -139,7 +140,7 @@ var oggToJS = function (cb) {
     var base64 = new Buffer(data, 'binary').toString('base64');
     var js = ('"' + notesArray[i] + '" : "data:audio/ogg;base64,' + base64 + '",\n');
     output += js;
-    bar.tick();
+    if(bar) bar.tick();
   }
 
   output +=  JS_FOOTER;
@@ -156,7 +157,7 @@ var mp3ToJS = function (cb) {
     var base64 = new Buffer(data, 'binary').toString('base64');
     var js = ('"' + notesArray[i] + '" : "data:audio/mpeg;base64,' + base64 + '",\n');
     output += js;
-    bar.tick();
+    if(bar) bar.tick();
   }
   output +=  JS_FOOTER;
   if(cb) cb(output);
@@ -176,30 +177,41 @@ var save = function(output, extension,  cb) {
 // Execute function chain
 prepare(function() {
           
-          bar = new ProgressBar('[SoundFontJS][:bar] :percent Cutting Source File', { total: 12 * octaves + 1});
-          bar.tick();
+          
+          if(!program.progress) {
+            bar = new ProgressBar('[SoundFontJS][:bar] :percent Cutting Source File', { total: 12 * octaves + 1});
+            bar.tick();
+          } 
           cut(function(){
             
-
-            bar = new ProgressBar('[SoundFontJS][:bar] :percent Converting to MP3', { total: 12 * octaves + 1});
-            bar.tick();
+            
+            if(!program.progress) {
+              bar = new ProgressBar('[SoundFontJS][:bar] :percent Converting to MP3', { total: 12 * octaves + 1});
+              bar.tick();
+            }
             convertMP3(function(){
               
-
-              bar = new ProgressBar('[SoundFontJS][:bar] :percent Converting to OGG', { total: 12 * octaves + 1});
-              bar.tick();
+              
+              if(!program.progress) {
+                bar = new ProgressBar('[SoundFontJS][:bar] :percent Converting to OGG', { total: 12 * octaves + 1});
+                bar.tick();        
+              }              
               convertOGG(function(){
                 
                 
-                bar = new ProgressBar('[SoundFontJS][:bar] :percent Writing OGG JS', { total: 12 * octaves + 1});
+                if(!program.progress) {
+                  bar = new ProgressBar('[SoundFontJS][:bar] :percent Writing OGG JS', { total: 12 * octaves + 1});
+                  bar.tick();
+                } 
                 notesArray.sort()
-                bar.tick();
                 oggToJS(function(output) {
                   save(output, 'ogg', function() {
                     
 
-                    bar = new ProgressBar('[SoundFontJS][:bar] :percent Writing MP3 JS', { total: 12 * octaves + 1});
-                    bar.tick();
+                    if(!program.progress) {
+                      bar = new ProgressBar('[SoundFontJS][:bar] :percent Writing MP3 JS', { total: 12 * octaves + 1});
+                      bar.tick();
+                    } 
                     mp3ToJS(function(output) {
                       save(output, 'mp3', function() {
                         

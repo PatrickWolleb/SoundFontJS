@@ -1,32 +1,24 @@
 var exec = require('child_process').exec;
+var fs = require('fs');
 
-describe('Test PUBLIC API', function(){
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000;
 
-  it('checks output', function(done){
-      exec('sfjs', function(err, stdout, stderr) {
-        console.log('stdout', err);
-        console.log('stdout', stdout);
-        console.log('stderr', stderr);
+describe('PUBLIC API', function(){
+
+  it('should not find the source file', function(done){
+      exec('./bin/sfjs -p', function(err, stdout, stderr) {
+        expect(stderr).toContain('[SoundFontJS] Error: Source file not found.')
         done();
       })
   });
 
-  // it('shows asynchronous test', function(){
-  //   setTimeout(function(){
-  //     expect('second').toEqual('second');
-  //     asyncSpecDone();
-  //   }, 1);
-  //   expect('first').toEqual('first');
-  //   asyncSpecWait();
-  // });
+  it('should compile the example project to example/acoustic_grand_piano', function(done){
+      exec('./bin/sfjs -s example/font.wav -b example/ -p', function(err, stdout, stderr) {
+        expect(fs.existsSync('example/acoustic_grand_piano')).toBe(true);
+        expect(fs.existsSync('example/acoustic_grand_piano/acoustic_grand_piano-ogg.js')).toBe(true);
+        expect(fs.existsSync('example/acoustic_grand_piano/acoustic_grand_piano-mp3.js')).toBe(true);
+        done();
+      })
+  });
 
-  // it('shows asynchronous test node-style', function(done){
-  //   setTimeout(function(){
-  //     expect('second').toEqual('second');
-  //     // If you call done() with an argument, it will fail the spec 
-  //     // so you can use it as a handler for many async node calls
-  //     done();
-  //   }, 1);
-  //   expect('first').toEqual('first');
-  // });
 });
