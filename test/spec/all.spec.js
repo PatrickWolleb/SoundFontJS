@@ -14,6 +14,11 @@ describe('PUBLIC API', function(){
 
   it('should compile the example project to example/acoustic_grand_piano', function(done){
       exec('./bin/sfjs -s example/font.wav -b example/ -p', function(err, stdout, stderr) {
+
+        console.log(err);
+        console.log(stdout);
+        console.log(stderr);
+
         expect(fs.existsSync('example/acoustic_grand_piano')).toBe(true);
         expect(fs.existsSync('example/acoustic_grand_piano/acoustic_grand_piano-ogg.js')).toBe(true);
         expect(fs.existsSync('example/acoustic_grand_piano/acoustic_grand_piano-mp3.js')).toBe(true);
