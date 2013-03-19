@@ -1,10 +1,11 @@
 {
-  "name": "soundfontjs",
+  "name": "sfjs",
   "version": "0.0.1",
-  "description": "dsaad",
+  "description": "Command line tool for creating sound font js files compatible with MIDI.js.",
+  "main" : "./bin/sfjs",
   "bin": "./bin/sfjs",
   "scripts": {
-    "test": "npm install && jasmine-node test/spec"
+    "test": "jasmine-node test/spec"
   },
   "repository": {
     "type": "git",

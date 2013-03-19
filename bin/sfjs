@@ -6,13 +6,12 @@ var program = require('commander');
 var ProgressBar = require('progress');
 
 program
-  .version('0.0.1')
   .description('create js sound font from wav')
   .option('-s --source <path>', 'source audio file', 'font.wav')
   .option('-b --build <path>', 'build directory defaults to "build"', 'build' )
   .option('-l --min <int>', 'minimum bit rate defaults to 64 Kbit/sec', 64 )
   .option('-h --max <int>', 'maximum bit rate defaults to 128 Kbit/sec', 128 )
-  .option('-o --out <name>', 'output instrument name defaults "acoustic_grand_piano"', 'acoustic_grand_piano' )
+  .option('-o --output <name>', 'output instrument name defaults "acoustic_grand_piano"', 'acoustic_grand_piano' )
   .parse(process.argv);
 
    
