@@ -3,18 +3,18 @@ SoundFontJS
 
 Node JS CLI for creating MIDI.JS ready sound fonts. The tool converts high quality wav files to sound font js files compatible with [MIDI.js](https://github.com/mudcube/MIDI.js). It allows the use of Pro DAWs like Logic, Cubase etc. to create nicer sounds than what sound font synths can produce.
 
-##Dependencies:
+## Dependencies:
 
 Make sure you have the following dependencies installed on your system.
 
 - [oggenc](http://www.rarewares.org/ogg-oggenc.php) 
 - [lame](http://lame.sourceforge.net/)
 
-##Setup
+## Setup
 
 `npm install sfjs -g`
 
-##Usage
+## Usage
 
 Run `ulimit -n 10000` to prevent memory allocation issues.
 
